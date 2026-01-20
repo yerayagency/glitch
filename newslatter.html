@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desconexión del Sistema</title>
+    <style>
+        /* --- 1. CONFIGURACIÓN BASE --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #2bdeb3; /* Verde Menta Tokito */
+            font-family: 'Courier New', Courier, monospace;
+            overflow-x: hidden;
+        }
+
+        /* --- 2. FONDO: LLUVIA MATRIX + NIEBLA --- */
+        canvas {
+            display: block;
+            position: fixed;
+            top: 0; left: 0;
+            z-index: -1;
+            opacity: 0.8;
+        }
+
+        .fog-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -2;
+            background: radial-gradient(circle at 50% 50%, rgba(43, 222, 179, 0.1), transparent 80%);
+            animation: pulseFog 10s infinite alternate;
+        }
+
+        @keyframes pulseFog {
+            0% { opacity: 0.3; }
+            100% { opacity: 0.7; }
+        }
+
+        /* --- 3. SECCIONES Y TEXTO --- */
+        section {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .text-box {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 30px;
+            border-radius: 5px;
+            border-left: 3px solid #2bdeb3;
+            box-shadow: 0 0 30px rgba(43, 222, 179, 0.15);
+            max-width: 800px;
+            width: 90%; 
+            box-sizing: border-box; /* Mantiene el ancho perfecto */
+            backdrop-filter: blur(5px);
+        }
+
+        .typewriter-text {
+            font-size: 1.8rem;
+            line-height: 1.5;
+            margin: 0;
+            min-height: 3rem;
+            word-wrap: break-word;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 10px;
+            height: 1.8rem;
+            background-color: #2bdeb3;
+            animation: blink 0.8s infinite;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+        /* --- 4. FORMULARIO Y GLITCH --- */
+        .form-container {
+            margin-top: 30px;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 1s ease-out;
+            box-sizing: border-box;
+        }
+
+        .form-visible { opacity: 1; transform: translateY(0); }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0, 20, 15, 0.9);
+            border: 1px solid #2bdeb3;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            outline: none;
+            box-sizing: border-box; /* Mantiene los márgenes dentro */
+        }
+
+        input:focus { box-shadow: 0 0 15px rgba(43, 222, 179, 0.5); }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #2bdeb3;
+            color: #000;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        button:hover { background: #fff; box-shadow: 0 0 20px #2bdeb3; }
+
+        /* --- EFECTO GLITCH (FALLO DE SISTEMA) --- */
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
+            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
+            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
+            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
+            80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
+            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+        }
+
+        .system-failure {
+            animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
+            background-color: #000;
+            color: #ff0055 !important;
+            border-color: #ff0055 !important;
+        }
+        
+        .success-message {
+            color: #2bdeb3;
+            text-align: center;
+            font-size: 1.2rem;
+            display: none;
+        }
+
+        .scroll-down {
+            position: absolute; bottom: 30px; font-size: 2rem;
+            animation: bounce 2s infinite; opacity: 0.7;
+        }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    </style>
+</head>
+<body>
+
+    <div class="fog-overlay"></div>
+    <canvas id="matrixCanvas"></canvas>
+
+    <section>
+        <div class="text-box">
+            <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
+        </div>
+        <div class="scroll-down">⬇</div>
+    </section>
+
+    <section>
+        <div class="text-box">
+            <div class="typewriter-text" data-text="No necesitas correr más rápido. Necesitas ver más claro."></div>
+        </div>
+    </section>
+
+    <section>
+        <div class="text-box">
+            <div class="typewriter-text" data-text="Déjame ayudarte a cambiar horas de scroll vacío por minutos de claridad mental."></div>
+        </div>
+    </section>
+
+    <section>
+        <div class="text-box" id="finalBox">
+            <div class="typewriter-text" data-text="Inicia la sincronización."></div>
+            
+            <div class="form-container" id="formContainer">
+                <form id="miFormulario">
+                    <input type="text" id="nombre" placeholder="Nombre_Operativo" required autocomplete="off">
+                    <input type="email" id="email" placeholder="Enlace_Correo" required autocomplete="off">
+                    <button type="submit">ACCEDER AL SISTEMA</button>
+                </form>
+            </div>
+
+            <div class="success-message" id="successMsg">
+                <h2 style="border-bottom: 2px solid #2bdeb3; padding-bottom:10px;">ACCESO CONCEDIDO</h2>
+                <p>Gracias por confiar, <span id="userNameDisplay"></span>.</p>
+                <p style="margin-top:20px; font-style: italic;">
+                    "A partir de ahora, cada lunes recibirás un correo para que dediques menos tiempo al scroll y más a leer."
+                </p>
+                <p style="margin-top:30px; font-size: 0.8rem; opacity: 0.7;">> CONEXIÓN TERMINADA.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        /* --- 1. LLUVIA MATRIX --- */
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
+        const fontSize = 16;
+        const columns = canvas.width / fontSize; 
+        const drops = Array(Math.floor(columns)).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#2bdeb3';
+            ctx.font = fontSize + 'px monospace';
+
+            for(let i = 0; i < drops.length; i++) {
+                const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+        setInterval(drawMatrix, 33);
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+        /* --- 2. ESCRITURA EN VIVO --- */
+        function typeWriter(element, text) {
+            let i = 0;
+            element.innerHTML = '<span class="cursor"></span>';
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
+                    i++;
+                    setTimeout(type, Math.floor(Math.random() * (70 - 30 + 1) + 30));
+                }
+            }
+            type();
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const target = entry.target.querySelector('.typewriter-text');
+                    if (target && !target.classList.contains('typed')) {
+                        target.classList.add('typed');
+                        typeWriter(target, target.getAttribute('data-text'));
+                    }
+                    const form = entry.target.querySelector('.form-container');
+                    if (form) { setTimeout(() => { form.classList.add('form-visible'); }, 1500); }
+                }
+            });
+        }, { threshold: 0.5 });
+
+        document.querySelectorAll('section').forEach(section => { observer.observe(section); });
+
+        /* --- 3. ENVÍO DATOS (PRODUCCIÓN) --- */
+        document.getElementById('miFormulario').addEventListener('submit', function(e) {
+            e.preventDefault(); 
+            
+            const nombre = document.getElementById('nombre').value;
+            const email = document.getElementById('email').value;
+            
+            // Elementos visuales
+            const cajaPrincipal = document.getElementById('finalBox');
+            const formContainer = document.getElementById('formContainer');
+            const successMsg = document.getElementById('successMsg');
+            const userDisplay = document.getElementById('userNameDisplay');
+
+            // ✅ URL DE PRODUCCIÓN ACTIVA
+            const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
+
+            console.log("🚀 Enviando datos a producción...");
+
+            // 1. Efecto Visual GLITCH
+            cajaPrincipal.classList.add('system-failure');
+
+            // 2. Envío REAL a n8n
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombre, email: email })
+            })
+            .then(res => {
+                if(res.ok) console.log("✅ Datos recibidos en n8n");
+                else console.warn("⚠️ Hubo un problema de conexión (pero mostramos éxito al usuario)");
+            })
+            .catch(err => console.error("❌ Error de red:", err));
+
+            // 3. Resultado tras 1.5s
+            setTimeout(() => {
+                cajaPrincipal.classList.remove('system-failure');
+                formContainer.style.display = 'none';
+                userDisplay.innerText = nombre;
+                successMsg.style.display = 'block';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
