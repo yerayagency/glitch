@@ -79,28 +79,27 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* --- 4. MODO MÓVIL (LA MAGIA NUEVA) 📱 --- */
-        /* Esto solo se activa si la pantalla es pequeña */
+        /* --- 4. MODO MÓVIL OPTIMIZADO 📱 --- */
         @media (max-width: 768px) {
             .text-box {
-                padding: 15px !important; /* Menos relleno interno */
-                width: 95% !important;    /* Más ancho para aprovechar pantalla */
-                border-left: 2px solid #2bdeb3; /* Borde más fino */
+                padding: 15px !important;
+                width: 95% !important;
+                border-left: 2px solid #2bdeb3;
             }
 
             .typewriter-text {
-                font-size: 1.1rem !important; /* Letra MUCHO más pequeña */
+                font-size: 1.1rem !important;
                 line-height: 1.4;
                 min-height: 2rem;
             }
 
             .cursor {
-                height: 1.1rem !important; /* Cursor ajustado al tamaño de letra */
+                height: 1.1rem !important;
                 width: 6px;
             }
 
             section {
-                padding: 10px; /* Menos márgenes laterales */
+                padding: 10px;
             }
         }
 
@@ -118,13 +117,13 @@
 
         input {
             width: 100%;
-            padding: 12px; /* Un poco más fino */
+            padding: 12px;
             margin-bottom: 12px;
             background: rgba(0, 20, 15, 0.9);
             border: 1px solid #2bdeb3;
             color: #fff;
             font-family: 'Courier New', monospace;
-            font-size: 1rem; /* Letra legible en móvil */
+            font-size: 1rem;
             outline: none;
             box-sizing: border-box;
         }
@@ -180,7 +179,7 @@
         <div class="text-box">
             <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
         </div>
-        </section>
+    </section>
 
     <section>
         <div class="text-box">
@@ -200,7 +199,6 @@
             
             <div class="form-container" id="formContainer">
                 <form id="miFormulario">
-                    <input type="text" id="nombre" placeholder="Nombre_Operativo" required autocomplete="off">
                     <input type="email" id="email" placeholder="Enlace_Correo" required autocomplete="off">
                     <button type="submit">ACCEDER AL SISTEMA</button>
                 </form>
@@ -208,7 +206,7 @@
 
             <div class="success-message" id="successMsg">
                 <h2 style="border-bottom: 2px solid #2bdeb3; padding-bottom:10px;">ACCESO CONCEDIDO</h2>
-                <p>Gracias por confiar, <span id="userNameDisplay"></span>.</p>
+                <p>Identidad verificada. Bienvenido al sistema.</p>
                 <p style="margin-top:20px; font-style: italic;">
                     "A partir de ahora, recibirás un correo cada lunes. Menos scroll, más lectura."
                 </p>
@@ -218,11 +216,10 @@
     </section>
 
     <script>
-        /* --- 1. LLUVIA MATRIX (CORREGIDA PARA MÓVIL) --- */
+        /* --- 1. LLUVIA MATRIX --- */
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
         
-        // Función para ajustar tamaño
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -230,7 +227,7 @@
         resizeCanvas();
 
         const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
-        const fontSize = 14; // Letra de lluvia un pelín más pequeña
+        const fontSize = 14; 
         const columns = canvas.width / fontSize; 
         const drops = Array(Math.floor(columns)).fill(1);
 
@@ -249,11 +246,7 @@
         }
         setInterval(drawMatrix, 33);
 
-        // ✅ CORRECCIÓN DEL REINICIO AL TOCAR PANTALLA
-        // Solo reiniciamos la lluvia si cambia el ANCHO (girar el móvil).
-        // Si cambia el ALTO (barra de dirección al hacer scroll), lo ignoramos.
         let lastWidth = window.innerWidth;
-        
         window.addEventListener('resize', () => {
             if (window.innerWidth !== lastWidth) {
                 resizeCanvas();
@@ -287,23 +280,22 @@
                     if (form) { setTimeout(() => { form.classList.add('form-visible'); }, 1500); }
                 }
             });
-        }, { threshold: 0.3 }); // Umbral más bajo para móvil
+        }, { threshold: 0.3 });
 
         document.querySelectorAll('section').forEach(section => { observer.observe(section); });
 
-        /* --- 3. ENVÍO DATOS --- */
+        /* --- 3. ENVÍO DATOS (SOLO EMAIL) --- */
         document.getElementById('miFormulario').addEventListener('submit', function(e) {
             e.preventDefault(); 
             
-            const nombre = document.getElementById('nombre').value;
+            // ❌ NOMBRE ELIMINADO
             const email = document.getElementById('email').value;
             
             const cajaPrincipal = document.getElementById('finalBox');
             const formContainer = document.getElementById('formContainer');
             const successMsg = document.getElementById('successMsg');
-            const userDisplay = document.getElementById('userNameDisplay');
 
-            // TU URL
+            // URL DE PRODUCCIÓN
             const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
 
             cajaPrincipal.classList.add('system-failure');
@@ -311,13 +303,12 @@
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ nombre: nombre, email: email })
+                body: JSON.stringify({ email: email }) // Solo enviamos el email
             }).catch(console.error);
 
             setTimeout(() => {
                 cajaPrincipal.classList.remove('system-failure');
                 formContainer.style.display = 'none';
-                userDisplay.innerText = nombre;
                 successMsg.style.display = 'block';
             }, 1500);
         });
