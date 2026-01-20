@@ -211,6 +211,10 @@
                     "A partir de ahora, recibirás un correo cada lunes. Menos scroll, más lectura."
                 </p>
                 <p style="margin-top:30px; font-size: 0.8rem; opacity: 0.7;">> CONEXIÓN TERMINADA.</p>
+                
+                <p style="margin-top:15px; font-size: 0.6rem; opacity: 0.5; letter-spacing: 1px;">
+                    (⚠️ Si no recibes la señal, revisa tu carpeta de SPAM)
+                </p>
             </div>
         </div>
     </section>
@@ -246,6 +250,7 @@
         }
         setInterval(drawMatrix, 33);
 
+        /* Control de redimensionado para evitar saltos en móvil */
         let lastWidth = window.innerWidth;
         window.addEventListener('resize', () => {
             if (window.innerWidth !== lastWidth) {
@@ -284,28 +289,29 @@
 
         document.querySelectorAll('section').forEach(section => { observer.observe(section); });
 
-        /* --- 3. ENVÍO DATOS (SOLO EMAIL) --- */
+        /* --- 3. ENVÍO DATOS (WEBHOOK) --- */
         document.getElementById('miFormulario').addEventListener('submit', function(e) {
             e.preventDefault(); 
             
-            // ❌ NOMBRE ELIMINADO
             const email = document.getElementById('email').value;
             
             const cajaPrincipal = document.getElementById('finalBox');
             const formContainer = document.getElementById('formContainer');
             const successMsg = document.getElementById('successMsg');
 
-            // URL DE PRODUCCIÓN
+            // URL DE TU WEBHOOK EN N8N
             const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
 
+            // Efecto Glitch al enviar
             cajaPrincipal.classList.add('system-failure');
 
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }) // Solo enviamos el email
+                body: JSON.stringify({ email: email }) // Solo enviamos email
             }).catch(console.error);
 
+            // Mostrar mensaje de éxito tras 1.5s
             setTimeout(() => {
                 cajaPrincipal.classList.remove('system-failure');
                 formContainer.style.display = 'none';
