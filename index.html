@@ -37,7 +37,7 @@
             100% { opacity: 0.7; }
         }
 
-        /* --- 3. SECCIONES Y TEXTO --- */
+        /* --- 3. SECCIONES Y TEXTO (GENERAL) --- */
         section {
             min-height: 100vh;
             display: flex;
@@ -46,6 +46,7 @@
             align-items: center;
             padding: 20px;
             position: relative;
+            box-sizing: border-box;
         }
 
         .text-box {
@@ -56,7 +57,7 @@
             box-shadow: 0 0 30px rgba(43, 222, 179, 0.15);
             max-width: 800px;
             width: 90%; 
-            box-sizing: border-box; /* Mantiene el ancho perfecto */
+            box-sizing: border-box;
             backdrop-filter: blur(5px);
         }
 
@@ -78,9 +79,34 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* --- 4. FORMULARIO Y GLITCH --- */
+        /* --- 4. MODO MÓVIL (LA MAGIA NUEVA) 📱 --- */
+        /* Esto solo se activa si la pantalla es pequeña */
+        @media (max-width: 768px) {
+            .text-box {
+                padding: 15px !important; /* Menos relleno interno */
+                width: 95% !important;    /* Más ancho para aprovechar pantalla */
+                border-left: 2px solid #2bdeb3; /* Borde más fino */
+            }
+
+            .typewriter-text {
+                font-size: 1.1rem !important; /* Letra MUCHO más pequeña */
+                line-height: 1.4;
+                min-height: 2rem;
+            }
+
+            .cursor {
+                height: 1.1rem !important; /* Cursor ajustado al tamaño de letra */
+                width: 6px;
+            }
+
+            section {
+                padding: 10px; /* Menos márgenes laterales */
+            }
+        }
+
+        /* --- 5. FORMULARIO Y GLITCH --- */
         .form-container {
-            margin-top: 30px;
+            margin-top: 20px;
             width: 100%;
             opacity: 0;
             transform: translateY(20px);
@@ -92,26 +118,24 @@
 
         input {
             width: 100%;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 12px; /* Un poco más fino */
+            margin-bottom: 12px;
             background: rgba(0, 20, 15, 0.9);
             border: 1px solid #2bdeb3;
             color: #fff;
             font-family: 'Courier New', monospace;
-            font-size: 1rem;
+            font-size: 1rem; /* Letra legible en móvil */
             outline: none;
-            box-sizing: border-box; /* Mantiene los márgenes dentro */
+            box-sizing: border-box;
         }
-
-        input:focus { box-shadow: 0 0 15px rgba(43, 222, 179, 0.5); }
 
         button {
             width: 100%;
-            padding: 15px;
+            padding: 12px;
             background: #2bdeb3;
             color: #000;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             border: none;
             cursor: pointer;
             text-transform: uppercase;
@@ -122,7 +146,6 @@
 
         button:hover { background: #fff; box-shadow: 0 0 20px #2bdeb3; }
 
-        /* --- EFECTO GLITCH (FALLO DE SISTEMA) --- */
         @keyframes glitch-anim-1 {
             0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
             20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
@@ -142,15 +165,9 @@
         .success-message {
             color: #2bdeb3;
             text-align: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             display: none;
         }
-
-        .scroll-down {
-            position: absolute; bottom: 30px; font-size: 2rem;
-            animation: bounce 2s infinite; opacity: 0.7;
-        }
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
     </style>
 </head>
@@ -163,8 +180,7 @@
         <div class="text-box">
             <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
         </div>
-        <div class="scroll-down">⬇</div>
-    </section>
+        </section>
 
     <section>
         <div class="text-box">
@@ -194,7 +210,7 @@
                 <h2 style="border-bottom: 2px solid #2bdeb3; padding-bottom:10px;">ACCESO CONCEDIDO</h2>
                 <p>Gracias por confiar, <span id="userNameDisplay"></span>.</p>
                 <p style="margin-top:20px; font-style: italic;">
-                    "A partir de ahora, cada lunes recibirás un correo para que dediques menos tiempo al scroll y más a leer."
+                    "A partir de ahora, recibirás un correo cada lunes. Menos scroll, más lectura."
                 </p>
                 <p style="margin-top:30px; font-size: 0.8rem; opacity: 0.7;">> CONEXIÓN TERMINADA.</p>
             </div>
@@ -202,14 +218,19 @@
     </section>
 
     <script>
-        /* --- 1. LLUVIA MATRIX --- */
+        /* --- 1. LLUVIA MATRIX (CORREGIDA PARA MÓVIL) --- */
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        
+        // Función para ajustar tamaño
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
 
         const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
-        const fontSize = 16;
+        const fontSize = 14; // Letra de lluvia un pelín más pequeña
         const columns = canvas.width / fontSize; 
         const drops = Array(Math.floor(columns)).fill(1);
 
@@ -227,7 +248,18 @@
             }
         }
         setInterval(drawMatrix, 33);
-        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+
+        // ✅ CORRECCIÓN DEL REINICIO AL TOCAR PANTALLA
+        // Solo reiniciamos la lluvia si cambia el ANCHO (girar el móvil).
+        // Si cambia el ALTO (barra de dirección al hacer scroll), lo ignoramos.
+        let lastWidth = window.innerWidth;
+        
+        window.addEventListener('resize', () => {
+            if (window.innerWidth !== lastWidth) {
+                resizeCanvas();
+                lastWidth = window.innerWidth;
+            }
+        });
 
         /* --- 2. ESCRITURA EN VIVO --- */
         function typeWriter(element, text) {
@@ -255,44 +287,33 @@
                     if (form) { setTimeout(() => { form.classList.add('form-visible'); }, 1500); }
                 }
             });
-        }, { threshold: 0.5 });
+        }, { threshold: 0.3 }); // Umbral más bajo para móvil
 
         document.querySelectorAll('section').forEach(section => { observer.observe(section); });
 
-        /* --- 3. ENVÍO DATOS (PRODUCCIÓN) --- */
+        /* --- 3. ENVÍO DATOS --- */
         document.getElementById('miFormulario').addEventListener('submit', function(e) {
             e.preventDefault(); 
             
             const nombre = document.getElementById('nombre').value;
             const email = document.getElementById('email').value;
             
-            // Elementos visuales
             const cajaPrincipal = document.getElementById('finalBox');
             const formContainer = document.getElementById('formContainer');
             const successMsg = document.getElementById('successMsg');
             const userDisplay = document.getElementById('userNameDisplay');
 
-            // ✅ URL DE PRODUCCIÓN ACTIVA
+            // TU URL
             const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
 
-            console.log("🚀 Enviando datos a producción...");
-
-            // 1. Efecto Visual GLITCH
             cajaPrincipal.classList.add('system-failure');
 
-            // 2. Envío REAL a n8n
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombre: nombre, email: email })
-            })
-            .then(res => {
-                if(res.ok) console.log("✅ Datos recibidos en n8n");
-                else console.warn("⚠️ Hubo un problema de conexión (pero mostramos éxito al usuario)");
-            })
-            .catch(err => console.error("❌ Error de red:", err));
+            }).catch(console.error);
 
-            // 3. Resultado tras 1.5s
             setTimeout(() => {
                 cajaPrincipal.classList.remove('system-failure');
                 formContainer.style.display = 'none';
