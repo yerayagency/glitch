@@ -19,7 +19,10 @@
         canvas {
             display: block;
             position: fixed;
-            top: 0; left: 0;
+            top: 0; 
+            left: 0;
+            width: 100vw;  /* ARREGLO F11: Forzar ancho completo */
+            height: 100vh; /* ARREGLO F11: Forzar alto completo */
             z-index: -1;
             opacity: 0.8;
         }
@@ -220,20 +223,31 @@
     </section>
 
     <script>
-        /* --- 1. LLUVIA MATRIX --- */
+        /* --- 1. LLUVIA MATRIX (VERSIÓN FIX RESIZE) --- */
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
-        
-        function resizeCanvas() {
+
+        // Variables globales para poder resetearlas
+        let columns, drops;
+        const fontSize = 14; 
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
+
+        // Función Maestra: Calcula el tamaño y prepara las gotas
+        function initMatrix() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-        }
-        resizeCanvas();
 
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
-        const fontSize = 14; 
-        const columns = canvas.width / fontSize; 
-        const drops = Array(Math.floor(columns)).fill(1);
+            columns = canvas.width / fontSize;
+            
+            // Creamos un array nuevo para llenar toda la pantalla
+            drops = [];
+            for (let x = 0; x < columns; x++) {
+                drops[x] = 1; 
+            }
+        }
+
+        // Arrancamos la primera vez
+        initMatrix();
 
         function drawMatrix() {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
@@ -244,19 +258,22 @@
             for(let i = 0; i < drops.length; i++) {
                 const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                
+                // Si la gota llega al final DE LA NUEVA ALTURA, vuelve arriba
+                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
                 drops[i]++;
             }
         }
         setInterval(drawMatrix, 33);
 
-        /* Control de redimensionado para evitar saltos en móvil */
-        let lastWidth = window.innerWidth;
+        /* --- ARREGLO F11 / MÓVIL --- */
+        // Si la pantalla cambia de tamaño, reiniciamos la lluvia para cubrir el hueco negro
+        let resizeTimeout;
         window.addEventListener('resize', () => {
-            if (window.innerWidth !== lastWidth) {
-                resizeCanvas();
-                lastWidth = window.innerWidth;
-            }
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(initMatrix, 100); // Pequeño delay para eficiencia
         });
 
         /* --- 2. ESCRITURA EN VIVO --- */
