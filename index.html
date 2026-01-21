@@ -21,8 +21,8 @@
             position: fixed;
             top: 0; 
             left: 0;
-            width: 100vw;  /* ARREGLO F11: Forzar ancho completo */
-            height: 100vh; /* ARREGLO F11: Forzar alto completo */
+            width: 100vw;  
+            height: 100vh; 
             z-index: -1;
             opacity: 0.8;
         }
@@ -82,30 +82,26 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* --- NUEVO: INDICADOR DE SCROLL (EL CHIVATO) --- */
+        /* --- 4. NUEVO: INDICADOR DE SCROLL ESTÁTICO (BLANCO) --- */
         .scroll-hint {
             position: absolute;
-            bottom: 40px; /* Situado abajo */
+            bottom: 15%; /* Bastante más arriba */
             left: 50%;
             transform: translateX(-50%);
             text-align: center;
             font-size: 0.9rem;
-            opacity: 0.8;
-            animation: bounceHint 2s infinite;
-            width: 100%;
+            color: #ffffff; /* BLANCO */
+            background: rgba(0,0,0,0.7); /* Fondo oscuro transparente */
+            padding: 8px 15px;
+            border-radius: 4px;
+            width: auto;
             pointer-events: none;
             letter-spacing: 2px;
-            background: rgba(0,0,0,0.6); /* Fondo oscurito para leerse bien */
-            padding: 5px 0;
+            text-transform: uppercase;
+            /* SIN ANIMACIÓN DE MOVIMIENTO */
         }
 
-        @keyframes bounceHint {
-            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
-            40% { transform: translateX(-50%) translateY(-10px); }
-            60% { transform: translateX(-50%) translateY(-5px); }
-        }
-
-        /* --- 4. MODO MÓVIL OPTIMIZADO 📱 --- */
+        /* --- 5. MODO MÓVIL OPTIMIZADO 📱 --- */
         @media (max-width: 768px) {
             .text-box {
                 padding: 15px !important;
@@ -127,14 +123,15 @@
             section {
                 padding: 10px;
             }
-
+            
             .scroll-hint {
-                bottom: 80px; /* Un poco más arriba en móvil */
+                bottom: 12%; /* Ajuste para móvil */
                 font-size: 0.75rem;
+                width: 80%; /* Para que no se salga en pantallas muy estrechas */
             }
         }
 
-        /* --- 5. FORMULARIO Y GLITCH --- */
+        /* --- 6. FORMULARIO Y GLITCH --- */
         .form-container {
             margin-top: 20px;
             width: 100%;
@@ -210,22 +207,21 @@
         <div class="text-box">
             <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
         </div>
-        
-        <div class="scroll-hint">
-            ▼ SIGUE LA SEÑAL: DESLIZA ▼
-        </div>
+        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
     </section>
 
     <section>
         <div class="text-box">
             <div class="typewriter-text" data-text="No necesitas correr más rápido. Necesitas ver más claro."></div>
         </div>
+        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
     </section>
 
     <section>
         <div class="text-box">
             <div class="typewriter-text" data-text="Déjame ayudarte a cambiar horas de scroll vacío por minutos de claridad mental."></div>
         </div>
+        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
     </section>
 
     <section>
@@ -255,30 +251,24 @@
     </section>
 
     <script>
-        /* --- 1. LLUVIA MATRIX (VERSIÓN FIX RESIZE) --- */
+        /* --- 1. LLUVIA MATRIX --- */
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Variables globales para poder resetearlas
         let columns, drops;
         const fontSize = 14; 
         const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
 
-        // Función Maestra: Calcula el tamaño y prepara las gotas
         function initMatrix() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-
             columns = canvas.width / fontSize;
-            
-            // Creamos un array nuevo para llenar toda la pantalla
             drops = [];
             for (let x = 0; x < columns; x++) {
                 drops[x] = 1; 
             }
         }
 
-        // Arrancamos la primera vez
         initMatrix();
 
         function drawMatrix() {
@@ -291,7 +281,6 @@
                 const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
                 
-                // Si la gota llega al final DE LA NUEVA ALTURA, vuelve arriba
                 if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     drops[i] = 0;
                 }
@@ -300,12 +289,10 @@
         }
         setInterval(drawMatrix, 33);
 
-        /* --- ARREGLO F11 / MÓVIL --- */
-        // Si la pantalla cambia de tamaño, reiniciamos la lluvia para cubrir el hueco negro
         let resizeTimeout;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(initMatrix, 100); // Pequeño delay para eficiencia
+            resizeTimeout = setTimeout(initMatrix, 100); 
         });
 
         /* --- 2. ESCRITURA EN VIVO --- */
@@ -343,24 +330,21 @@
             e.preventDefault(); 
             
             const email = document.getElementById('email').value;
-            
             const cajaPrincipal = document.getElementById('finalBox');
             const formContainer = document.getElementById('formContainer');
             const successMsg = document.getElementById('successMsg');
 
-            // URL DE TU WEBHOOK EN N8N
+            // URL WEBHOOK
             const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
 
-            // Efecto Glitch al enviar
             cajaPrincipal.classList.add('system-failure');
 
             fetch(webhookUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }) // Solo enviamos email
+                body: JSON.stringify({ email: email }) 
             }).catch(console.error);
 
-            // Mostrar mensaje de éxito tras 1.5s
             setTimeout(() => {
                 cajaPrincipal.classList.remove('system-failure');
                 formContainer.style.display = 'none';
