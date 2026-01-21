@@ -82,6 +82,29 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
+        /* --- NUEVO: INDICADOR DE SCROLL (EL CHIVATO) --- */
+        .scroll-hint {
+            position: absolute;
+            bottom: 40px; /* Situado abajo */
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            animation: bounceHint 2s infinite;
+            width: 100%;
+            pointer-events: none;
+            letter-spacing: 2px;
+            background: rgba(0,0,0,0.6); /* Fondo oscurito para leerse bien */
+            padding: 5px 0;
+        }
+
+        @keyframes bounceHint {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-10px); }
+            60% { transform: translateX(-50%) translateY(-5px); }
+        }
+
         /* --- 4. MODO MÓVIL OPTIMIZADO 📱 --- */
         @media (max-width: 768px) {
             .text-box {
@@ -103,6 +126,11 @@
 
             section {
                 padding: 10px;
+            }
+
+            .scroll-hint {
+                bottom: 80px; /* Un poco más arriba en móvil */
+                font-size: 0.75rem;
             }
         }
 
@@ -181,6 +209,10 @@
     <section>
         <div class="text-box">
             <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
+        </div>
+        
+        <div class="scroll-hint">
+            ▼ SIGUE LA SEÑAL: DESLIZA ▼
         </div>
     </section>
 
