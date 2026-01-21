@@ -3,337 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desconexión del Sistema</title>
+    <title>SYSTEM_OVERRIDE // MTZ</title>
     <style>
-        /* --- 1. CONFIGURACIÓN BASE --- */
+        /* --- RESET Y ESTILOS BASE --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            margin: 0;
-            padding: 0;
             background-color: #000;
-            color: #2bdeb3; /* Verde Menta Tokito */
+            color: #0f0;
             font-family: 'Courier New', Courier, monospace;
             overflow-x: hidden;
         }
 
-        /* --- 2. FONDO: LLUVIA MATRIX + NIEBLA --- */
-        canvas {
-            display: block;
+        /* --- FONDO MATRIX (CANVAS) --- */
+        #matrixCanvas {
             position: fixed;
-            top: 0; 
-            left: 0;
-            width: 100vw;  /* ARREGLO F11: Forzar ancho completo */
-            height: 100vh; /* ARREGLO F11: Forzar alto completo */
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             z-index: -1;
-            opacity: 0.8;
+            opacity: 0.2; /* Lluvia sutil */
         }
 
-        .fog-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            background: radial-gradient(circle at 50% 50%, rgba(43, 222, 179, 0.1), transparent 80%);
-            animation: pulseFog 10s infinite alternate;
-        }
-
-        @keyframes pulseFog {
-            0% { opacity: 0.3; }
-            100% { opacity: 0.7; }
-        }
-
-        /* --- 3. SECCIONES Y TEXTO (GENERAL) --- */
-        section {
+        /* --- CONTENEDOR PRINCIPAL --- */
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 20px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
             position: relative;
-            box-sizing: border-box;
+            z-index: 1;
         }
 
-        .text-box {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 30px;
-            border-radius: 5px;
-            border-left: 3px solid #2bdeb3;
-            box-shadow: 0 0 30px rgba(43, 222, 179, 0.15);
-            max-width: 800px;
-            width: 90%; 
-            box-sizing: border-box;
-            backdrop-filter: blur(5px);
+        /* --- EFECTO GLITCH EN TEXTOS --- */
+        .glitch-wrapper {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
         }
 
-        .typewriter-text {
-            font-size: 1.8rem;
-            line-height: 1.5;
-            margin: 0;
-            min-height: 3rem;
-            word-wrap: break-word;
+        h1 {
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            text-shadow: 0 0 10px #0f0;
+            margin-bottom: 20px;
+            animation: glitch 1s infinite alternate;
         }
 
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.8rem;
-            background-color: #2bdeb3;
-            animation: blink 0.8s infinite;
+        p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            color: #cfc;
+            text-shadow: 0 0 5px #0f0;
         }
 
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-        /* --- 4. MODO MÓVIL OPTIMIZADO 📱 --- */
-        @media (max-width: 768px) {
-            .text-box {
-                padding: 15px !important;
-                width: 95% !important;
-                border-left: 2px solid #2bdeb3;
-            }
-
-            .typewriter-text {
-                font-size: 1.1rem !important;
-                line-height: 1.4;
-                min-height: 2rem;
-            }
-
-            .cursor {
-                height: 1.1rem !important;
-                width: 6px;
-            }
-
-            section {
-                padding: 10px;
-            }
+        /* --- EL CHIVATO DE SCROLL (NUEVO) --- */
+        .scroll-hint {
+            margin: 60px 0; /* Espacio para separar */
+            padding: 15px;
+            border: 1px solid #0f0;
+            background: rgba(0, 20, 0, 0.8);
+            color: #0f0;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            animation: blink 1.5s infinite;
+            cursor: default;
+            font-size: 0.9rem;
+            text-align: center;
+            box-shadow: 0 0 15px #0f0;
         }
 
-        /* --- 5. FORMULARIO Y GLITCH --- */
+        /* --- FORMULARIO OCULTO (EL NÚCLEO) --- */
         .form-container {
-            margin-top: 20px;
             width: 100%;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 1s ease-out;
-            box-sizing: border-box;
+            background: rgba(0, 10, 0, 0.9);
+            border: 1px solid #0f0;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.2);
+            margin-bottom: 50px;
         }
 
-        .form-visible { opacity: 1; transform: translateY(0); }
-
-        input {
+        input, textarea, button {
             width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: rgba(0, 20, 15, 0.9);
-            border: 1px solid #2bdeb3;
-            color: #fff;
-            font-family: 'Courier New', monospace;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: #000;
+            border: 1px solid #333;
+            color: #0f0;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 1rem;
             outline: none;
-            box-sizing: border-box;
+            transition: 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            border-color: #0f0;
+            box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
         }
 
         button {
-            width: 100%;
-            padding: 12px;
-            background: #2bdeb3;
+            background: #0f0;
             color: #000;
             font-weight: bold;
-            font-size: 1rem;
-            border: none;
             cursor: pointer;
             text-transform: uppercase;
             letter-spacing: 2px;
-            transition: 0.3s;
-            box-sizing: border-box;
+            border: none;
         }
 
-        button:hover { background: #fff; box-shadow: 0 0 20px #2bdeb3; }
-
-        @keyframes glitch-anim-1 {
-            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
-            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
-            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
-            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
-            80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
-            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
+        button:hover {
+            background: #fff;
+            box-shadow: 0 0 20px #0f0;
         }
 
-        .system-failure {
-            animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
-            background-color: #000;
-            color: #ff0055 !important;
-            border-color: #ff0055 !important;
-        }
-        
-        .success-message {
-            color: #2bdeb3;
-            text-align: center;
-            font-size: 1rem;
-            display: none;
+        /* --- ANIMACIONES --- */
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
         }
 
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* AJUSTE MÓVIL */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .scroll-hint { font-size: 0.8rem; padding: 10px; }
+        }
     </style>
 </head>
 <body>
 
-    <div class="fog-overlay"></div>
     <canvas id="matrixCanvas"></canvas>
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
+    <div class="container">
+        
+        <div class="glitch-wrapper">
+            <h1>SYSTEM_WAKE_UP</h1>
+            <p>La Matrix te tiene...</p>
+            <p>Has estado buscando respuestas. Sabes que algo falla en tu negocio. Haces tareas repetitivas. Pierdes tiempo. Pierdes vida.</p>
+            <p>Yo ofrezco la verdad. Nada más.</p>
         </div>
-    </section>
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="No necesitas correr más rápido. Necesitas ver más claro."></div>
+        <div class="scroll-hint">
+            ▼ DESCIFRANDO NÚCLEO... DESLIZA PARA CONTINUAR ▼
         </div>
-    </section>
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="Déjame ayudarte a cambiar horas de scroll vacío por minutos de claridad mental."></div>
-        </div>
-    </section>
+        <div class="form-container" id="contactFormBlock">
+            <p style="text-align: center; margin-bottom: 20px; border-bottom: 1px solid #0f0; padding-bottom: 10px;">
+                > INICIAR PROTOCOLO DE AUTOMATIZACIÓN_
+            </p>
 
-    <section>
-        <div class="text-box" id="finalBox">
-            <div class="typewriter-text" data-text="Inicia la sincronización."></div>
-            
-            <div class="form-container" id="formContainer">
-                <form id="miFormulario">
-                    <input type="email" id="email" placeholder="Enlace_Correo" required autocomplete="off">
-                    <button type="submit">ACCEDER AL SISTEMA</button>
-                </form>
-            </div>
-
-            <div class="success-message" id="successMsg">
-                <h2 style="border-bottom: 2px solid #2bdeb3; padding-bottom:10px;">ACCESO CONCEDIDO</h2>
-                <p>Identidad verificada. Bienvenido al sistema.</p>
-                <p style="margin-top:20px; font-style: italic;">
-                    "A partir de ahora, recibirás un correo cada lunes. Menos scroll, más lectura."
-                </p>
-                <p style="margin-top:30px; font-size: 0.8rem; opacity: 0.7;">> CONEXIÓN TERMINADA.</p>
+            <form id="matrixForm">
+                <input type="text" id="nombre" placeholder="IDENTIDAD (Nombre)" required>
+                <input type="email" id="email" placeholder="ENLACE DE COMUNICACIÓN (Email)" required>
+                <textarea id="mensaje" rows="4" placeholder="OBJETIVO DE LA MISIÓN (¿Qué necesitas?)" required></textarea>
                 
-                <p style="margin-top:15px; font-size: 0.6rem; opacity: 0.5; letter-spacing: 1px;">
-                    (⚠️ Si no recibes la señal, revisa tu carpeta de SPAM)
-                </p>
-            </div>
+                <button type="submit" id="submitBtn">EJECUTAR .EXE</button>
+            </form>
         </div>
-    </section>
+
+        <p style="font-size: 0.8rem; opacity: 0.5; margin-top: 20px;">
+            SYSTEM_ID: MTZ_AUTOMATIONS_V1.0
+        </p>
+
+    </div>
 
     <script>
-        /* --- 1. LLUVIA MATRIX (VERSIÓN FIX RESIZE) --- */
+        // 1. LLUVIA MATRIX
         const canvas = document.getElementById('matrixCanvas');
         const ctx = canvas.getContext('2d');
 
-        // Variables globales para poder resetearlas
-        let columns, drops;
-        const fontSize = 14; 
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-        // Función Maestra: Calcula el tamaño y prepara las gotas
-        function initMatrix() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const alphabet = katakana + latin + nums;
 
-            columns = canvas.width / fontSize;
-            
-            // Creamos un array nuevo para llenar toda la pantalla
-            drops = [];
-            for (let x = 0; x < columns; x++) {
-                drops[x] = 1; 
-            }
-        }
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = Array.from({ length: columns }).fill(1);
 
-        // Arrancamos la primera vez
-        initMatrix();
-
-        function drawMatrix() {
+        const draw = () => {
             ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#2bdeb3';
+
+            ctx.fillStyle = '#0F0';
             ctx.font = fontSize + 'px monospace';
 
-            for(let i = 0; i < drops.length; i++) {
-                const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                
-                // Si la gota llega al final DE LA NUEVA ALTURA, vuelve arriba
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
-        }
-        setInterval(drawMatrix, 33);
+            for (let i = 0; i < rainDrops.length; i++) {
+                const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
 
-        /* --- ARREGLO F11 / MÓVIL --- */
-        // Si la pantalla cambia de tamaño, reiniciamos la lluvia para cubrir el hueco negro
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(initMatrix, 100); // Pequeño delay para eficiencia
+                if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    rainDrops[i] = 0;
+                }
+                rainDrops[i]++;
+            }
+        };
+        setInterval(draw, 30);
+
+        // 2. ENVÍO DEL FORMULARIO (WEBHOOK)
+        document.getElementById('matrixForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerText;
+
+            btn.innerText = 'PROCESANDO DATOS...';
+            btn.style.background = '#003300';
+            btn.disabled = true;
+
+            const formData = {
+                nombre: document.getElementById('nombre').value,
+                email: document.getElementById('email').value,
+                mensaje: document.getElementById('mensaje').value,
+                origen: 'Web Matrix Glitch',
+                fecha: new Date().toISOString()
+            };
+
+            try {
+                // USAMOS TU WEBHOOK DE MTZ
+                const response = await fetch('https://yerayagency.app.n8n.cloud/webhook/Portfolio', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                if (response.ok) {
+                    btn.innerText = 'ACCESO CONCEDIDO';
+                    btn.style.background = '#0f0';
+                    btn.style.color = '#000';
+                    document.getElementById('matrixForm').reset();
+                    
+                    setTimeout(() => {
+                        btn.innerText = originalText;
+                        btn.style.background = '';
+                        btn.style.color = '';
+                        btn.disabled = false;
+                    }, 4000);
+                } else {
+                    throw new Error('Error de red');
+                }
+            } catch (error) {
+                console.error(error);
+                btn.innerText = 'ERROR DE SISTEMA';
+                btn.style.background = 'red';
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.background = '';
+                    btn.disabled = false;
+                }, 3000);
+            }
         });
 
-        /* --- 2. ESCRITURA EN VIVO --- */
-        function typeWriter(element, text) {
-            let i = 0;
-            element.innerHTML = '<span class="cursor"></span>';
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
-                    i++;
-                    setTimeout(type, Math.floor(Math.random() * (70 - 30 + 1) + 30));
-                }
-            }
-            type();
-        }
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const target = entry.target.querySelector('.typewriter-text');
-                    if (target && !target.classList.contains('typed')) {
-                        target.classList.add('typed');
-                        typeWriter(target, target.getAttribute('data-text'));
-                    }
-                    const form = entry.target.querySelector('.form-container');
-                    if (form) { setTimeout(() => { form.classList.add('form-visible'); }, 1500); }
-                }
-            });
-        }, { threshold: 0.3 });
-
-        document.querySelectorAll('section').forEach(section => { observer.observe(section); });
-
-        /* --- 3. ENVÍO DATOS (WEBHOOK) --- */
-        document.getElementById('miFormulario').addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            
-            const email = document.getElementById('email').value;
-            
-            const cajaPrincipal = document.getElementById('finalBox');
-            const formContainer = document.getElementById('formContainer');
-            const successMsg = document.getElementById('successMsg');
-
-            // URL DE TU WEBHOOK EN N8N
-            const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
-
-            // Efecto Glitch al enviar
-            cajaPrincipal.classList.add('system-failure');
-
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }) // Solo enviamos email
-            }).catch(console.error);
-
-            // Mostrar mensaje de éxito tras 1.5s
-            setTimeout(() => {
-                cajaPrincipal.classList.remove('system-failure');
-                formContainer.style.display = 'none';
-                successMsg.style.display = 'block';
-            }, 1500);
+        // Ajustar canvas al redimensionar
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
         });
     </script>
 </body>
