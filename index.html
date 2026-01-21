@@ -82,7 +82,7 @@
 
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        /* --- 4. NUEVO: INDICADOR DE SCROLL ESTÁTICO (BLANCO) --- */
+        /* --- 4. INDICADOR DE SCROLL (SOLO PRIMERA CAJA) --- */
         .scroll-hint {
             position: absolute;
             bottom: 15%; /* Bastante más arriba */
@@ -98,7 +98,6 @@
             pointer-events: none;
             letter-spacing: 2px;
             text-transform: uppercase;
-            /* SIN ANIMACIÓN DE MOVIMIENTO */
         }
 
         /* --- 5. MODO MÓVIL OPTIMIZADO 📱 --- */
@@ -125,9 +124,9 @@
             }
             
             .scroll-hint {
-                bottom: 12%; /* Ajuste para móvil */
+                bottom: 12%; 
                 font-size: 0.75rem;
-                width: 80%; /* Para que no se salga en pantallas muy estrechas */
+                width: 80%; 
             }
         }
 
@@ -207,21 +206,19 @@
         <div class="text-box">
             <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
         </div>
-        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
+        <div class="scroll-hint">DESLIZA PARA INICIAR LA SINCRONIZACIÓN</div>
     </section>
 
     <section>
         <div class="text-box">
             <div class="typewriter-text" data-text="No necesitas correr más rápido. Necesitas ver más claro."></div>
         </div>
-        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
     </section>
 
     <section>
         <div class="text-box">
             <div class="typewriter-text" data-text="Déjame ayudarte a cambiar horas de scroll vacío por minutos de claridad mental."></div>
         </div>
-        <div class="scroll-hint">DESLIZA HASTA DESCIFRAR EL PROGRAMA</div>
     </section>
 
     <section>
