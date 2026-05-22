@@ -1,353 +1,925 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desconexión del Sistema</title>
-    <style>
-        /* --- 1. CONFIGURACIÓN BASE --- */
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #000;
-            color: #2bdeb3; /* Verde Menta Tokito */
-            font-family: 'Courier New', Courier, monospace;
-            overflow-x: hidden;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        /* --- 2. FONDO: LLUVIA MATRIX + NIEBLA --- */
-        canvas {
-            display: block;
-            position: fixed;
-            top: 0; 
-            left: 0;
-            width: 100vw;  
-            height: 100vh; 
-            z-index: -1;
-            opacity: 0.8;
-        }
+<title>Signal // Desconexión del Ruido</title>
 
-        .fog-overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -2;
-            background: radial-gradient(circle at 50% 50%, rgba(43, 222, 179, 0.1), transparent 80%);
-            animation: pulseFog 10s infinite alternate;
-        }
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-        @keyframes pulseFog {
-            0% { opacity: 0.3; }
-            100% { opacity: 0.7; }
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
-        /* --- 3. SECCIONES Y TEXTO (GENERAL) --- */
-        section {
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            position: relative;
-            box-sizing: border-box;
-        }
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 
-        .text-box {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 30px;
-            border-radius: 5px;
-            border-left: 3px solid #2bdeb3;
-            box-shadow: 0 0 30px rgba(43, 222, 179, 0.15);
-            max-width: 800px;
-            width: 90%; 
-            box-sizing: border-box;
-            backdrop-filter: blur(5px);
-        }
+<style>
 
-        .typewriter-text {
-            font-size: 1.8rem;
-            line-height: 1.5;
-            margin: 0;
-            min-height: 3rem;
-            word-wrap: break-word;
-        }
+:root{
+    --bg:#050505;
+    --bg-soft:#0b0b0b;
+    --panel:rgba(255,255,255,0.04);
+    --line:rgba(255,255,255,0.08);
+    --text:#f4f4f4;
+    --muted:#8a8a8a;
+    --signal:#8ff7d1;
+    --signal-soft:rgba(143,247,209,0.14);
+    --blur:20px;
+    --radius:28px;
+}
 
-        .cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.8rem;
-            background-color: #2bdeb3;
-            animation: blink 0.8s infinite;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+html{
+    scroll-behavior:smooth;
+}
 
-        /* --- 4. INDICADOR DE SCROLL (SOLO PRIMERA CAJA) --- */
-        .scroll-hint {
-            position: absolute;
-            bottom: 15%; /* Bastante más arriba */
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            font-size: 0.9rem;
-            color: #ffffff; /* BLANCO */
-            background: rgba(0,0,0,0.7); /* Fondo oscuro transparente */
-            padding: 8px 15px;
-            border-radius: 4px;
-            width: auto;
-            pointer-events: none;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-        }
+body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
 
-        /* --- 5. MODO MÓVIL OPTIMIZADO 📱 --- */
-        @media (max-width: 768px) {
-            .text-box {
-                padding: 15px !important;
-                width: 95% !important;
-                border-left: 2px solid #2bdeb3;
-            }
+/* BACKGROUND */
 
-            .typewriter-text {
-                font-size: 1.1rem !important;
-                line-height: 1.4;
-                min-height: 2rem;
-            }
+.noise{
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    opacity:.025;
+    z-index:2;
+    background-image:url("https://grainy-gradients.vercel.app/noise.svg");
+}
 
-            .cursor {
-                height: 1.1rem !important;
-                width: 6px;
-            }
+.grid{
+    position:fixed;
+    inset:0;
+    z-index:-5;
+    background:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size:70px 70px;
+    mask-image:radial-gradient(circle at center, black 20%, transparent 80%);
+}
 
-            section {
-                padding: 10px;
-            }
-            
-            .scroll-hint {
-                bottom: 12%; 
-                font-size: 0.75rem;
-                width: 80%; 
-            }
-        }
+.ambient{
+    position:fixed;
+    width:70vw;
+    height:70vw;
+    border-radius:50%;
+    background:radial-gradient(circle, rgba(143,247,209,0.08), transparent 70%);
+    filter:blur(90px);
+    top:-20%;
+    left:50%;
+    transform:translateX(-50%);
+    z-index:-4;
+    animation:floatAmbient 12s ease-in-out infinite alternate;
+}
 
-        /* --- 6. FORMULARIO Y GLITCH --- */
-        .form-container {
-            margin-top: 20px;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 1s ease-out;
-            box-sizing: border-box;
-        }
+@keyframes floatAmbient{
+    from{
+        transform:translateX(-50%) translateY(-20px);
+    }
+    to{
+        transform:translateX(-50%) translateY(40px);
+    }
+}
 
-        .form-visible { opacity: 1; transform: translateY(0); }
+/* MATRIX */
 
-        input {
-            width: 100%;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: rgba(0, 20, 15, 0.9);
-            border: 1px solid #2bdeb3;
-            color: #fff;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            outline: none;
-            box-sizing: border-box;
-        }
+canvas{
+    position:fixed;
+    inset:0;
+    z-index:-3;
+    opacity:.18;
+}
 
-        button {
-            width: 100%;
-            padding: 12px;
-            background: #2bdeb3;
-            color: #000;
-            font-weight: bold;
-            font-size: 1rem;
-            border: none;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            transition: 0.3s;
-            box-sizing: border-box;
-        }
+/* GLOBAL */
 
-        button:hover { background: #fff; box-shadow: 0 0 20px #2bdeb3; }
+section{
+    position:relative;
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:8vw;
+}
 
-        @keyframes glitch-anim-1 {
-            0% { clip-path: inset(20% 0 80% 0); transform: translate(-2px, 1px); }
-            20% { clip-path: inset(60% 0 10% 0); transform: translate(2px, -1px); }
-            40% { clip-path: inset(40% 0 50% 0); transform: translate(-2px, 2px); }
-            60% { clip-path: inset(80% 0 5% 0); transform: translate(2px, -2px); }
-            80% { clip-path: inset(10% 0 70% 0); transform: translate(-1px, 1px); }
-            100% { clip-path: inset(30% 0 50% 0); transform: translate(1px, -1px); }
-        }
+.container{
+    width:min(1200px,100%);
+    margin:auto;
+}
 
-        .system-failure {
-            animation: glitch-anim-1 0.3s infinite linear alternate-reverse;
-            background-color: #000;
-            color: #ff0055 !important;
-            border-color: #ff0055 !important;
-        }
-        
-        .success-message {
-            color: #2bdeb3;
-            text-align: center;
-            font-size: 1rem;
-            display: none;
-        }
+/* HERO */
 
-    </style>
+.hero{
+    align-items:flex-end;
+    padding-bottom:10vh;
+}
+
+.hero-inner{
+    width:100%;
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    gap:60px;
+}
+
+.signal-tag{
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    border:1px solid var(--line);
+    background:rgba(255,255,255,0.03);
+    border-radius:100px;
+    backdrop-filter:blur(var(--blur));
+    margin-bottom:28px;
+}
+
+.signal-dot{
+    width:8px;
+    height:8px;
+    border-radius:50%;
+    background:var(--signal);
+    box-shadow:0 0 18px var(--signal);
+}
+
+.signal-tag span{
+    font-size:.78rem;
+    color:#d7d7d7;
+    letter-spacing:.18em;
+    text-transform:uppercase;
+}
+
+.hero-title{
+    font-size:clamp(4rem,9vw,9rem);
+    line-height:.9;
+    font-weight:700;
+    letter-spacing:-0.08em;
+    max-width:900px;
+}
+
+.hero-title .muted{
+    color:#6e6e6e;
+    font-weight:500;
+}
+
+.hero-sub{
+    margin-top:30px;
+    max-width:600px;
+    color:#b0b0b0;
+    font-size:1.05rem;
+    line-height:1.8;
+    letter-spacing:-0.01em;
+}
+
+.scroll-indicator{
+    position:absolute;
+    bottom:40px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:.72rem;
+    letter-spacing:.35em;
+    text-transform:uppercase;
+    color:#787878;
+}
+
+/* PANELS */
+
+.panel-wrap{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.panel{
+    width:min(980px,100%);
+    padding:90px;
+    border-radius:var(--radius);
+    background:linear-gradient(
+        180deg,
+        rgba(255,255,255,0.045),
+        rgba(255,255,255,0.02)
+    );
+    border:1px solid rgba(255,255,255,0.06);
+    backdrop-filter:blur(18px);
+    position:relative;
+    overflow:hidden;
+}
+
+.panel::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:
+    linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.03),
+        transparent
+    );
+    transform:translateX(-100%);
+}
+
+.panel:hover::before{
+    transition:1.8s ease;
+    transform:translateX(100%);
+}
+
+.panel-label{
+    font-size:.7rem;
+    letter-spacing:.28em;
+    color:#7a7a7a;
+    text-transform:uppercase;
+    margin-bottom:28px;
+}
+
+.panel-text{
+    font-size:clamp(2rem,5vw,5rem);
+    line-height:1.02;
+    letter-spacing:-0.06em;
+    font-weight:600;
+    max-width:820px;
+}
+
+.panel-text .fade{
+    color:#666;
+    font-weight:500;
+}
+
+.panel-desc{
+    margin-top:30px;
+    max-width:520px;
+    color:#8d8d8d;
+    line-height:1.9;
+    font-size:1rem;
+}
+
+/* DIVIDER */
+
+.divider{
+    height:1px;
+    width:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+}
+
+/* CTA */
+
+.cta{
+    min-height:120vh;
+}
+
+.cta-box{
+    width:min(760px,100%);
+    padding:80px;
+    border-radius:32px;
+    background:
+    linear-gradient(
+        180deg,
+        rgba(255,255,255,0.05),
+        rgba(255,255,255,0.02)
+    );
+    border:1px solid rgba(255,255,255,0.08);
+    backdrop-filter:blur(20px);
+    position:relative;
+    overflow:hidden;
+}
+
+.cta-box::after{
+    content:"";
+    position:absolute;
+    inset:auto 0 0 0;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--signal-soft),transparent);
+}
+
+.cta-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:30px;
+    margin-bottom:60px;
+}
+
+.cta-small{
+    color:#7f7f7f;
+    font-size:.75rem;
+    text-transform:uppercase;
+    letter-spacing:.28em;
+}
+
+.cta-status{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    color:#b8b8b8;
+    font-size:.82rem;
+}
+
+.cta-title{
+    font-size:clamp(2.8rem,6vw,5rem);
+    line-height:.95;
+    letter-spacing:-0.08em;
+    max-width:600px;
+    margin-bottom:25px;
+}
+
+.cta-copy{
+    max-width:520px;
+    color:#909090;
+    line-height:1.9;
+    margin-bottom:50px;
+}
+
+/* FORM */
+
+.form{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+.input-wrap{
+    position:relative;
+}
+
+input{
+    width:100%;
+    height:70px;
+    border-radius:18px;
+    border:1px solid rgba(255,255,255,0.08);
+    background:rgba(255,255,255,0.03);
+    padding:0 24px;
+    color:white;
+    font-size:1rem;
+    outline:none;
+    transition:.35s ease;
+    backdrop-filter:blur(10px);
+}
+
+input::placeholder{
+    color:#6d6d6d;
+    letter-spacing:.04em;
+}
+
+input:focus{
+    border-color:rgba(143,247,209,0.4);
+    background:rgba(255,255,255,0.045);
+    box-shadow:0 0 0 4px rgba(143,247,209,0.05);
+}
+
+button{
+    height:70px;
+    border:none;
+    border-radius:18px;
+    background:linear-gradient(
+        180deg,
+        rgba(255,255,255,0.95),
+        rgba(210,210,210,0.95)
+    );
+    color:#050505;
+    font-weight:600;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:.4s ease;
+    position:relative;
+    overflow:hidden;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    box-shadow:
+    0 20px 50px rgba(255,255,255,0.08),
+    0 0 40px rgba(143,247,209,0.06);
+}
+
+button::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(
+        120deg,
+        transparent,
+        rgba(255,255,255,0.3),
+        transparent
+    );
+    transform:translateX(-100%);
+}
+
+button:hover::before{
+    transform:translateX(100%);
+    transition:1.4s ease;
+}
+
+/* SUCCESS */
+
+.success{
+    display:none;
+    flex-direction:column;
+    gap:18px;
+}
+
+.success h2{
+    font-size:2.6rem;
+    letter-spacing:-0.06em;
+    font-weight:600;
+}
+
+.success p{
+    color:#9b9b9b;
+    line-height:1.9;
+}
+
+.signal-line{
+    width:100%;
+    height:1px;
+    background:linear-gradient(90deg,transparent,var(--signal-soft),transparent);
+    margin:12px 0;
+}
+
+/* FOOT */
+
+.system-footer{
+    position:fixed;
+    bottom:24px;
+    right:24px;
+    color:#575757;
+    font-size:.72rem;
+    letter-spacing:.16em;
+    text-transform:uppercase;
+    z-index:20;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:900px){
+
+    section{
+        padding:24px;
+    }
+
+    .hero{
+        align-items:center;
+        padding-top:120px;
+    }
+
+    .hero-inner{
+        flex-direction:column;
+        align-items:flex-start;
+        justify-content:center;
+    }
+
+    .hero-title{
+        font-size:4.3rem;
+    }
+
+    .hero-sub{
+        font-size:.98rem;
+        line-height:1.8;
+    }
+
+    .panel{
+        padding:40px 28px;
+    }
+
+    .panel-text{
+        font-size:2.6rem;
+        line-height:1.05;
+    }
+
+    .cta-box{
+        padding:40px 24px;
+    }
+
+    .cta-title{
+        font-size:3rem;
+    }
+
+    input,
+    button{
+        height:64px;
+    }
+
+    .scroll-indicator{
+        bottom:22px;
+    }
+
+    .system-footer{
+        display:none;
+    }
+}
+
+</style>
 </head>
+
 <body>
 
-    <div class="fog-overlay"></div>
-    <canvas id="matrixCanvas"></canvas>
+<div class="noise"></div>
+<div class="grid"></div>
+<div class="ambient"></div>
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="¿Sientes la niebla mental?"></div>
-        </div>
-        <div class="scroll-hint">DESLIZA PARA INICIAR LA SINCRONIZACIÓN</div>
-    </section>
+<canvas id="matrix"></canvas>
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="No necesitas correr más rápido. Necesitas ver más claro."></div>
-        </div>
-    </section>
+<!-- HERO -->
 
-    <section>
-        <div class="text-box">
-            <div class="typewriter-text" data-text="Déjame ayudarte a cambiar horas de scroll vacío por minutos de claridad mental."></div>
-        </div>
-    </section>
+<section class="hero">
 
-    <section>
-        <div class="text-box" id="finalBox">
-            <div class="typewriter-text" data-text="Inicia la sincronización."></div>
-            
-            <div class="form-container" id="formContainer">
-                <form id="miFormulario">
-                    <input type="email" id="email" placeholder="Enlace_Correo" required autocomplete="off">
-                    <button type="submit">ACCEDER AL SISTEMA</button>
-                </form>
+    <div class="container hero-inner">
+
+        <div>
+            <div class="signal-tag reveal">
+                <div class="signal-dot"></div>
+                <span>SEÑAL DETECTADA</span>
             </div>
 
-            <div class="success-message" id="successMsg">
-                <h2 style="border-bottom: 2px solid #2bdeb3; padding-bottom:10px;">ACCESO CONCEDIDO</h2>
-                <p>Identidad verificada. Bienvenido al sistema.</p>
-                <p style="margin-top:20px; font-style: italic;">
-                    "A partir de ahora, recibirás un correo cada lunes. Menos scroll, más lectura."
-                </p>
-                <p style="margin-top:30px; font-size: 0.8rem; opacity: 0.7;">> CONEXIÓN TERMINADA.</p>
-                
-                <p style="margin-top:15px; font-size: 0.6rem; opacity: 0.5; letter-spacing: 1px;">
-                    (⚠️ Si no recibes la señal, revisa tu carpeta de SPAM)
-                </p>
-            </div>
+            <h1 class="hero-title reveal">
+                Estás conectado<br>
+                <span class="muted">todo el día.</span>
+            </h1>
+
+            <p class="hero-sub reveal">
+                Pero hace tiempo que no estás presente.
+                <br><br>
+                Demasiado ruido.
+                Demasiada velocidad.
+                Demasiada estimulación para escuchar tus propios pensamientos.
+            </p>
         </div>
-    </section>
 
-    <script>
-        /* --- 1. LLUVIA MATRIX --- */
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
+    </div>
 
-        let columns, drops;
-        const fontSize = 14; 
-        const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ█';
+    <div class="scroll-indicator">
+        DESLIZA // CONTINÚA LA TRANSMISIÓN
+    </div>
 
-        function initMatrix() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            columns = canvas.width / fontSize;
-            drops = [];
-            for (let x = 0; x < columns; x++) {
-                drops[x] = 1; 
-            }
+</section>
+
+<!-- PANEL 1 -->
+
+<section class="panel-wrap">
+
+    <div class="panel reveal-panel">
+
+        <div class="panel-label">
+            SISTEMA // 01
+        </div>
+
+        <div class="panel-text split">
+            El problema no es la falta de tiempo.
+            <span class="fade">
+                Es la fragmentación constante de tu atención.
+            </span>
+        </div>
+
+        <div class="panel-desc">
+            Tu mente nunca descansa lo suficiente como para pensar con claridad.
+            Solo cambia de estímulo.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PANEL 2 -->
+
+<section class="panel-wrap">
+
+    <div class="panel reveal-panel">
+
+        <div class="panel-label">
+            SISTEMA // 02
+        </div>
+
+        <div class="panel-text split">
+            Scroll.
+            Dopamina.
+            Ruido.
+            Repetir.
+        </div>
+
+        <div class="panel-desc">
+            El algoritmo no quiere que reflexiones.
+            Quiere que permanezcas reaccionando.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- PANEL 3 -->
+
+<section class="panel-wrap">
+
+    <div class="panel reveal-panel">
+
+        <div class="panel-label">
+            SISTEMA // 03
+        </div>
+
+        <div class="panel-text split">
+            La claridad mental
+            <span class="fade">
+                se ha convertido en un lujo.
+            </span>
+        </div>
+
+        <div class="panel-desc">
+            Y casi nadie se da cuenta de cuánto la necesita hasta que desaparece.
+        </div>
+
+    </div>
+
+</section>
+
+<!-- CTA -->
+
+<section class="cta">
+
+    <div class="cta-box reveal-panel" id="ctaBox">
+
+        <div class="cta-top">
+
+            <div class="cta-small">
+                PRIVATE SIGNAL
+            </div>
+
+            <div class="cta-status">
+                <div class="signal-dot"></div>
+                transmisión estable
+            </div>
+
+        </div>
+
+        <h2 class="cta-title">
+            Recibe la señal.<br>
+            Reduce el ruido.
+        </h2>
+
+        <p class="cta-copy">
+            Un correo cada lunes.
+            <br>
+            Sin spam.
+            Sin fórmulas vacías.
+            <br><br>
+            Solo ideas precisas para recuperar atención,
+            claridad y control mental.
+        </p>
+
+        <form class="form" id="signalForm">
+
+            <div class="input-wrap">
+                <input
+                    type="email"
+                    id="email"
+                    placeholder="Introduce tu acceso"
+                    autocomplete="off"
+                    required
+                >
+            </div>
+
+            <button type="submit">
+                ENTRAR EN LA TRANSMISIÓN
+            </button>
+
+        </form>
+
+        <div class="success" id="success">
+
+            <h2>Acceso concedido.</h2>
+
+            <div class="signal-line"></div>
+
+            <p>
+                La conexión ha sido establecida.
+            </p>
+
+            <p>
+                A partir de ahora recibirás una transmisión semanal.
+                Menos ruido.
+                Más claridad.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+<div class="system-footer">
+    SIGNAL ACTIVE // 2026
+</div>
+
+<script>
+
+gsap.registerPlugin(ScrollTrigger);
+
+/* MATRIX */
+
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+let width,height,columns,drops;
+
+const chars = "アカサタナハマヤラワ0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+function resizeCanvas(){
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+
+    columns = Math.floor(width / 18);
+    drops = Array(columns).fill(1);
+}
+
+resizeCanvas();
+
+function drawMatrix(){
+
+    ctx.fillStyle = "rgba(5,5,5,0.06)";
+    ctx.fillRect(0,0,width,height);
+
+    ctx.fillStyle = "rgba(143,247,209,0.75)";
+    ctx.font = "14px monospace";
+
+    for(let i=0;i<drops.length;i++){
+
+        const text = chars[Math.floor(Math.random() * chars.length)];
+
+        ctx.fillText(text,i*18,drops[i]*18);
+
+        if(drops[i]*18 > height && Math.random() > 0.985){
+            drops[i] = 0;
         }
 
-        initMatrix();
+        drops[i]++;
+    }
 
-        function drawMatrix() {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            ctx.fillStyle = '#2bdeb3';
-            ctx.font = fontSize + 'px monospace';
+}
 
-            for(let i = 0; i < drops.length; i++) {
-                const text = katakana.charAt(Math.floor(Math.random() * katakana.length));
-                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                
-                if(drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
-                    drops[i] = 0;
-                }
-                drops[i]++;
-            }
+setInterval(drawMatrix,42);
+
+window.addEventListener("resize",resizeCanvas);
+
+/* GSAP */
+
+gsap.utils.toArray(".reveal").forEach((el,i)=>{
+
+    gsap.from(el,{
+        opacity:0,
+        y:50,
+        filter:"blur(20px)",
+        duration:1.6,
+        delay:i * 0.1,
+        ease:"power3.out"
+    });
+
+});
+
+gsap.utils.toArray(".reveal-panel").forEach(panel=>{
+
+    gsap.from(panel,{
+        opacity:0,
+        y:100,
+        scale:0.96,
+        filter:"blur(30px)",
+        duration:1.8,
+        ease:"power3.out",
+        scrollTrigger:{
+            trigger:panel,
+            start:"top 82%",
         }
-        setInterval(drawMatrix, 33);
+    });
 
-        let resizeTimeout;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(initMatrix, 100); 
+});
+
+gsap.utils.toArray(".split").forEach(text => {
+
+    // 🚨 si tiene HTML interno, NO lo tocamos
+    if (text.querySelector("span")) return;
+
+    const words = text.innerText
+        .trim()
+        .split(/\s+/);
+
+    text.innerHTML = words
+        .map(word => `<span class="word">${word}</span>`)
+        .join(" ");
+
+    gsap.from(text.querySelectorAll(".word"), {
+        opacity: 0,
+        y: 20,
+        filter: "blur(8px)",
+        stagger: 0.03,
+        duration: 1,
+        ease: "power2.out",
+        scrollTrigger: {
+            trigger: text,
+            start: "top 85%"
+        }
+    });
+
+});
+
+/* PARALLAX */
+
+gsap.to(".ambient",{
+    y:120,
+    ease:"none",
+    scrollTrigger:{
+        scrub:true
+    }
+});
+
+gsap.utils.toArray(".panel").forEach(panel=>{
+
+    gsap.to(panel,{
+        y:-40,
+        ease:"none",
+        scrollTrigger:{
+            trigger:panel,
+            scrub:true
+        }
+    });
+
+});
+
+/* FORM */
+
+document.getElementById("signalForm").addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const email = document.getElementById("email").value;
+
+    const webhookUrl = "https://yerayagency.app.n8n.cloud/webhook/Glitch";
+
+    const box = document.getElementById("ctaBox");
+
+    gsap.to(box,{
+        scale:0.985,
+        duration:0.15,
+        yoyo:true,
+        repeat:1
+    });
+
+    try{
+
+        await fetch(webhookUrl,{
+            method:"POST",
+            headers:{
+                "Content-Type":"application/json"
+            },
+            body:JSON.stringify({ email })
         });
 
-        /* --- 2. ESCRITURA EN VIVO --- */
-        function typeWriter(element, text) {
-            let i = 0;
-            element.innerHTML = '<span class="cursor"></span>';
-            function type() {
-                if (i < text.length) {
-                    element.innerHTML = text.substring(0, i + 1) + '<span class="cursor"></span>';
-                    i++;
-                    setTimeout(type, Math.floor(Math.random() * (70 - 30 + 1) + 30));
-                }
-            }
-            type();
-        }
+    }catch(err){
+        console.error(err);
+    }
 
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const target = entry.target.querySelector('.typewriter-text');
-                    if (target && !target.classList.contains('typed')) {
-                        target.classList.add('typed');
-                        typeWriter(target, target.getAttribute('data-text'));
-                    }
-                    const form = entry.target.querySelector('.form-container');
-                    if (form) { setTimeout(() => { form.classList.add('form-visible'); }, 1500); }
-                }
+    gsap.to(".form",{
+        opacity:0,
+        y:-20,
+        duration:.6,
+        ease:"power2.out",
+        onComplete:()=>{
+            document.querySelector(".form").style.display = "none";
+            document.getElementById("success").style.display = "flex";
+
+            gsap.from("#success",{
+                opacity:0,
+                y:30,
+                filter:"blur(12px)",
+                duration:1.2,
+                ease:"power3.out"
             });
-        }, { threshold: 0.3 });
+        }
+    });
 
-        document.querySelectorAll('section').forEach(section => { observer.observe(section); });
+});
 
-        /* --- 3. ENVÍO DATOS (WEBHOOK) --- */
-        document.getElementById('miFormulario').addEventListener('submit', function(e) {
-            e.preventDefault(); 
-            
-            const email = document.getElementById('email').value;
-            const cajaPrincipal = document.getElementById('finalBox');
-            const formContainer = document.getElementById('formContainer');
-            const successMsg = document.getElementById('successMsg');
+/* CURSOR GLOW */
 
-            // URL WEBHOOK
-            const webhookUrl = 'https://yerayagency.app.n8n.cloud/webhook/Glitch';
+document.addEventListener("mousemove",(e)=>{
 
-            cajaPrincipal.classList.add('system-failure');
+    gsap.to(".ambient",{
+        x:(e.clientX - window.innerWidth/2) * 0.03,
+        y:(e.clientY - window.innerHeight/2) * 0.03,
+        duration:2,
+        ease:"power3.out"
+    });
 
-            fetch(webhookUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email }) 
-            }).catch(console.error);
+});
 
-            setTimeout(() => {
-                cajaPrincipal.classList.remove('system-failure');
-                formContainer.style.display = 'none';
-                successMsg.style.display = 'block';
-            }, 1500);
-        });
-    </script>
+</script>
+
 </body>
 </html>
